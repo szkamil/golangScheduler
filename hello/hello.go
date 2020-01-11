@@ -36,6 +36,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -52,6 +53,7 @@ func main() {
 		t := time.Now()
 		fmt.Println("Time's up! @", t.UTC())
 		test()
+		getConfig()
 	}
 	// Run every 2 seconds but not now.
 	scheduler.Every(2).Seconds().NotImmediately().Run(job)
@@ -66,7 +68,6 @@ func main() {
 }
 func test() {
 	fmt.Println("calling test function")
-	var abc int = 0
 	response, err := http.Get("http://pokeapi.co/api/v2/pokedex/kanto/")
 
 	if err != nil {
@@ -80,4 +81,23 @@ func test() {
 	}
 	fmt.Println(string(responseData))
 	fmt.Println(string("worked"))
+}
+
+func getConfig() {
+	type Configuration struct {
+		Users  []string
+		Groups []string
+	}
+
+	file, _ := os.Open("conf.json")
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	configuration := Configuration{}
+	err := decoder.Decode(&configuration)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	fmt.Println(configuration.Users) // output: [UserA, UserB]
+	fmt.Println(configuration.Groups)
+
 }
